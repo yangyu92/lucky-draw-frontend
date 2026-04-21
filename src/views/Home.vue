@@ -45,9 +45,9 @@
           v-for="winner in recentWinners" 
           :key="winner.id"
         >
-          <div class="winner-avatar">{{ winner.name[0] }}</div>
+          <div class="winner-avatar">{{ winner.participantName[0] }}</div>
           <div class="winner-info">
-            <div class="winner-name">{{ winner.name }}</div>
+            <div class="winner-name">{{ winner.participantName }}</div>
             <div class="winner-prize">{{ winner.prizeName }}</div>
           </div>
         </div>
@@ -62,12 +62,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
-import LotteryWheel from '@/components/LotteryWheel.vue'
-import PrizeCard from '@/components/PrizeCard.vue'
-import QRCode from '@/components/QRCode.vue'
+import type { Prize, Participant, Winner } from '@/types'
 
 const lotteryStore = useLotteryStore()
 
@@ -76,14 +74,19 @@ const subtitle = ref('好运降临 · 惊喜不断')
 const isDrawing = ref(false)
 const showQRCode = ref(true)
 const qrCodeUrl = ref('')
-const lotteryRef = ref(null)
+const lotteryRef = ref<InstanceType<typeof LotteryWheel> | null>(null)
 
-const candidates = computed(() => lotteryStore.pendingParticipants)
-const availablePrizes = computed(() => lotteryStore.availablePrizes)
-const currentPrize = computed(() => lotteryStore.currentPrize)
-const recentWinners = computed(() => lotteryStore.recentWinners)
+// 动态导入组件以支持TypeScript
+import LotteryWheel from '@/components/LotteryWheel.vue'
+import PrizeCard from '@/components/PrizeCard.vue'
+import QRCode from '@/components/QRCode.vue'
 
-const getParticleStyle = (i) => {
+const candidates = computed<Participant[]>(() => lotteryStore.pendingParticipants)
+const availablePrizes = computed<Prize[]>(() => lotteryStore.availablePrizes)
+const currentPrize = computed<Prize | null>(() => lotteryStore.currentPrize)
+const recentWinners = computed<Winner[]>(() => lotteryStore.recentWinners)
+
+const getParticleStyle = (i: number): Record<string, string> => {
   return {
     left: `${Math.random() * 100}%`,
     top: `${Math.random() * 100}%`,
@@ -92,7 +95,7 @@ const getParticleStyle = (i) => {
   }
 }
 
-const selectPrize = (prize) => {
+const selectPrize = (prize: Prize) => {
   lotteryStore.setCurrentPrize(prize)
 }
 
@@ -110,9 +113,11 @@ const startLottery = async () => {
   await lotteryStore.startDraw(currentPrize.value.quantity)
 }
 
-const handleLotteryEnd = async (winner) => {
+const handleLotteryEnd = async (winner: Winner) => {
   isDrawing.value = false
-  await lotteryStore.confirmWinner(winner, currentPrize.value.id)
+  if (currentPrize.value) {
+    await lotteryStore.confirmWinner(winner.participantId, currentPrize.value.id)
+  }
 }
 
 onMounted(async () => {
@@ -198,48 +203,46 @@ onMounted(async () => {
 }
 
 .winners-section {
+  text-align: center;
+}
+
+.winners-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.winners-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
 .winner-item {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  animation: slideIn 0.5s ease forwards;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 20px;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
 }
 
 .winner-avatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 1.5rem;
+  color: white;
   font-weight: bold;
+}
+
+.winner-info {
+  text-align: left;
 }
 
 .winner-name {
   color: #fff;
-  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -249,19 +252,12 @@ onMounted(async () => {
 }
 
 .qrcode-section {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  margin-top: 40px;
 }
 
 .qr-hint {
-  margin-top: 12px;
-  color: #666;
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 16px;
 }
 </style>

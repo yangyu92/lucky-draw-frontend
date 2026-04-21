@@ -75,25 +75,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
-import { ElMessage } from 'element-plus'
+import type { Participant, ParticipantStatus, CreateParticipantDto } from '@/types'
+
+interface StatusTextMap {
+  [key: string]: string
+}
 
 const lotteryStore = useLotteryStore()
 
-const searchKeyword = ref('')
-const filterStatus = ref('')
-const showAddModal = ref(false)
-const newParticipant = ref({ name: '', phone: '' })
+const searchKeyword = ref<string>('')
+const filterStatus = ref<string>('')
+const showAddModal = ref<boolean>(false)
+const newParticipant = ref<CreateParticipantDto>({ name: '', phone: '' })
 
-const statusText = {
+const statusText: StatusTextMap = {
   pending: '未签到',
   joined: '已签到',
   won: '已中奖'
 }
 
-const filteredParticipants = computed(() => {
+const filteredParticipants = computed<Participant[]>(() => {
   let list = lotteryStore.allParticipants
   if (searchKeyword.value) {
     const kw = searchKeyword.value.toLowerCase()
@@ -108,30 +112,30 @@ const filteredParticipants = computed(() => {
   return list
 })
 
-const formatTime = (time) => {
+const formatTime = (time: string): string => {
   return new Date(time).toLocaleString('zh-CN')
 }
 
 const addParticipant = async () => {
   if (!newParticipant.value.name) {
-    ElMessage.warning('请输入姓名')
+    alert('请输入姓名')
     return
   }
   await lotteryStore.addParticipant(newParticipant.value)
   newParticipant.value = { name: '', phone: '' }
   showAddModal.value = false
-  ElMessage.success('添加成功')
+  alert('添加成功')
 }
 
-const deleteParticipant = async (id) => {
+const deleteParticipant = async (id: number) => {
   if (confirm('确定要删除该人员吗？')) {
     await lotteryStore.deleteParticipant(id)
-    ElMessage.success('删除成功')
+    alert('删除成功')
   }
 }
 
 const importParticipants = () => {
-  ElMessage.info('批量导入功能开发中')
+  alert('批量导入功能开发中')
 }
 
 onMounted(() => {
@@ -203,17 +207,73 @@ onMounted(() => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.btn-danger {
-  background: #ff5252;
+  background: #ff4d4f;
   color: white;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #999;
+.btn-sm:hover {
+  opacity: 0.8;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #666;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-success {
+  background: #52c41a;
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.form-control {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .modal {
@@ -239,10 +299,26 @@ onMounted(() => {
   color: #333;
 }
 
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+}
+
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+  justify-content: flex-end;
   margin-top: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #999;
 }
 </style>

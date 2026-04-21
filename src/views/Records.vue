@@ -45,24 +45,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
+import type { Winner, PrizeLevel } from '@/types'
+
+interface RankClassMap {
+  [key: string]: string
+}
 
 const lotteryStore = useLotteryStore()
 
-const filterLevel = ref('')
+const filterLevel = ref<string>('')
 
-const filteredRecords = computed(() => {
+const filteredRecords = computed<Winner[]>(() => {
   let records = lotteryStore.winners
   if (filterLevel.value) {
     records = records.filter(r => r.prizeLevel === filterLevel.value)
   }
-  return records.sort((a, b) => new Date(b.drawTime) - new Date(a.drawTime))
+  return records.sort((a, b) => new Date(b.drawTime).getTime() - new Date(a.drawTime).getTime())
 })
 
-const getRankClass = (level) => {
-  const map = {
+const getRankClass = (level: string): string => {
+  const map: RankClassMap = {
     '特等奖': 'rank-special',
     '一等奖': 'rank-first',
     '二等奖': 'rank-second',
@@ -72,17 +77,17 @@ const getRankClass = (level) => {
   return map[level] || 'rank-participant'
 }
 
-const formatTime = (time) => {
+const formatTime = (time: string): string => {
   return new Date(time).toLocaleString('zh-CN')
 }
 
 const exportRecords = () => {
   const data = filteredRecords.value.map(r => ({
-    姓名: r.participantName,
-    手机号: r.phone || '',
-    奖项: r.prizeLevel,
-    奖品: r.prizeName,
-    中奖时间: formatTime(r.drawTime)
+    '姓名': r.participantName,
+    '手机号': r.phone || '',
+    '奖项': r.prizeLevel,
+    '奖品': r.prizeName,
+    '中奖时间': formatTime(r.drawTime)
   }))
   
   const csv = [
@@ -94,7 +99,7 @@ const exportRecords = () => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `中奖记录_${new Date().toISOString().slice(0,10)}.csv`
+  a.download = `中奖记录_${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -202,18 +207,56 @@ onMounted(() => {
 }
 
 .prize-name {
+  font-weight: 600;
   color: #333;
-  font-weight: 500;
 }
 
 .prize-time {
   color: #999;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.btn-success {
+  background: #52c41a;
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.form-control {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .empty-state {
   text-align: center;
-  padding: 60px;
+  padding: 40px;
   color: #999;
 }
 </style>

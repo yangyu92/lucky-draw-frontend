@@ -1,12 +1,13 @@
 {
   "name": "lucky-draw-frontend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "vue": "^3.4.21",
@@ -19,6 +20,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
     "vite": "^5.2.0",
-    "sass": "^1.72.0"
+    "sass": "^1.72.0",
+    "typescript": "^5.4.0",
+    "vue-tsc": "^2.0.0",
+    "@types/node": "^20.11.0"
   }
 }

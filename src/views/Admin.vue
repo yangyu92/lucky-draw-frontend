@@ -86,31 +86,39 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
+import type { Prize, Winner } from '@/types'
 
 const lotteryStore = useLotteryStore()
 
-const selectedPrizeId = ref('')
-const drawCount = ref(1)
-const isDrawing = ref(false)
+const selectedPrizeId = ref<string>('')
+const drawCount = ref<number>(1)
+const isDrawing = ref<boolean>(false)
 
-const stats = computed(() => ({
+interface Stats {
+  totalParticipants: number
+  totalPrizes: number
+  totalWinners: number
+  remainingPrizes: number
+}
+
+const stats = computed<Stats>(() => ({
   totalParticipants: lotteryStore.allParticipants.length,
   totalPrizes: lotteryStore.allPrizes.length,
   totalWinners: lotteryStore.winners.length,
   remainingPrizes: lotteryStore.availablePrizes.reduce((sum, p) => sum + p.remaining, 0)
 }))
 
-const availablePrizes = computed(() => lotteryStore.availablePrizes)
-const maxDrawCount = computed(() => {
-  const prize = availablePrizes.value.find(p => p.id == selectedPrizeId.value)
+const availablePrizes = computed<Prize[]>(() => lotteryStore.availablePrizes)
+const maxDrawCount = computed<number>(() => {
+  const prize = availablePrizes.value.find(p => p.id == Number(selectedPrizeId.value))
   return prize ? Math.min(prize.remaining, 10) : 1
 })
-const recentWinners = computed(() => lotteryStore.winners.slice(0, 10))
+const recentWinners = computed<Winner[]>(() => lotteryStore.winners.slice(0, 10))
 
-const formatTime = (time) => {
+const formatTime = (time: string): string => {
   return new Date(time).toLocaleString('zh-CN')
 }
 
@@ -120,7 +128,6 @@ const startQuickDraw = async () => {
     return
   }
   isDrawing.value = true
-  const prize = availablePrizes.value.find(p => p.id == selectedPrizeId.value)
   await lotteryStore.startDraw(drawCount.value)
   // 抽奖完成后刷新
   setTimeout(() => {
@@ -198,6 +205,10 @@ onMounted(() => {
   font-size: 3rem;
 }
 
+.stat-info {
+  flex: 1;
+}
+
 .stat-value {
   font-size: 2rem;
   font-weight: bold;
@@ -221,20 +232,78 @@ onMounted(() => {
 .draw-controls {
   display: flex;
   gap: 16px;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .draw-controls .form-control {
   flex: 1;
-  min-width: 150px;
-}
-
-.draw-controls .btn {
-  padding: 12px 32px;
+  max-width: 200px;
 }
 
 .recent-winners h2 {
   margin-bottom: 20px;
   color: #333;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #666;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.form-control {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
 }
 </style>

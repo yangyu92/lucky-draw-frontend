@@ -2,7 +2,7 @@
   <div class="prizes-page">
     <header class="page-header">
       <h1>🎁 奖品管理</h1>
-      <button class="btn btn-primary" @click="showAddModal = true">+ 添加奖品</button>
+      <button class="btn btn-primary" @click="openAddModal">+ 添加奖品</button>
     </header>
 
     <!-- 奖品列表 -->
@@ -50,7 +50,7 @@
         </div>
         <div class="form-group">
           <label>数量</label>
-          <input type="number" v-model="prizeForm.quantity" min="1" class="form-control" />
+          <input type="number" v-model.number="prizeForm.quantity" min="1" class="form-control" />
         </div>
         <div class="form-group">
           <label>图片URL</label>
@@ -65,27 +65,38 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
-import { ElMessage } from 'element-plus'
+import type { Prize, PrizeLevel, CreatePrizeDto, UpdatePrizeDto } from '@/types'
+
+interface PrizeFormData {
+  name: string
+  level: PrizeLevel
+  quantity: number
+  image_url: string
+}
 
 const lotteryStore = useLotteryStore()
 
-const showAddModal = ref(false)
-const editingPrize = ref(null)
-const prizeForm = ref({
+const showAddModal = ref<boolean>(false)
+const editingPrize = ref<Prize | null>(null)
+const prizeForm = ref<PrizeFormData>({
   name: '',
   level: '参与奖',
   quantity: 1,
   image_url: ''
 })
 
-const prizes = computed(() => lotteryStore.allPrizes)
+const prizes = computed<Prize[]>(() => lotteryStore.allPrizes)
 
-const editPrize = (prize) => {
+const openAddModal = () => {
+  showAddModal.value = true
+}
+
+const editPrize = (prize: Prize) => {
   editingPrize.value = prize
-  prizeForm.value = { ...prize }
+  prizeForm.value = { ...prize, level: prize.level as PrizeLevel }
   showAddModal.value = true
 }
 
@@ -97,24 +108,24 @@ const closeModal = () => {
 
 const savePrize = async () => {
   if (!prizeForm.value.name) {
-    ElMessage.warning('请输入奖品名称')
+    alert('请输入奖品名称')
     return
   }
   
   if (editingPrize.value) {
     await lotteryStore.updatePrize(editingPrize.value.id, prizeForm.value)
-    ElMessage.success('更新成功')
+    alert('更新成功')
   } else {
     await lotteryStore.addPrize(prizeForm.value)
-    ElMessage.success('添加成功')
+    alert('添加成功')
   }
   closeModal()
 }
 
-const deletePrize = async (id) => {
+const deletePrize = async (id: number) => {
   if (confirm('确定要删除该奖品吗？')) {
     await lotteryStore.deletePrize(id)
-    ElMessage.success('删除成功')
+    alert('删除成功')
   }
 }
 
@@ -199,19 +210,55 @@ onMounted(() => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  background: #e0e0e0;
-  color: #333;
+  background: #667eea;
+  color: white;
 }
 
-.btn-danger {
-  background: #ff5252 !important;
-  color: white !important;
+.btn-sm:hover {
+  opacity: 0.8;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px;
-  color: #999;
+.btn-sm.btn-danger {
+  background: #ff4d4f;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.form-control {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .modal {
@@ -228,7 +275,7 @@ onMounted(() => {
   background: white;
   border-radius: 16px;
   padding: 24px;
-  width: 450px;
+  width: 400px;
   max-width: 90%;
 }
 
@@ -237,10 +284,26 @@ onMounted(() => {
   color: #333;
 }
 
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+}
+
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+  justify-content: flex-end;
   margin-top: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #999;
 }
 </style>
