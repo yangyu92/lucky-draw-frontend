@@ -3,8 +3,6 @@ import { ref, computed } from 'vue'
 import type { Participant, Prize, Winner, CreateParticipantDto, CreatePrizeDto, UpdatePrizeDto } from '@/types'
 import { participantApi, prizeApi, lotteryApi } from '@/api'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
-
 export const useLotteryStore = defineStore('lottery', () => {
   // 状态
   const participants = ref<Participant[]>([])

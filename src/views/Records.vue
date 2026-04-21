@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
-import type { Winner, PrizeLevel } from '@/types'
+import type { Winner } from '@/types'
 
 interface RankClassMap {
   [key: string]: string

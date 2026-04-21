@@ -24,12 +24,6 @@ export interface DrawResult {
   winners: Winner[]
 }
 
-export interface DrawResponse {
-  success: boolean
-  data?: DrawResult
-  message?: string
-}
-
 export interface CurrentPrizeState {
   currentPrize: Prize | null
   isDrawing: boolean

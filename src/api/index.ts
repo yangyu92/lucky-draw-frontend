@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios'
+import axios, { type AxiosInstance, type AxiosError } from 'axios'
 import type {
   ApiResponse,
   Participant,
@@ -24,7 +24,7 @@ const api: AxiosInstance = axios.create({
 
 // 响应拦截器
 api.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => response.data,
+  (response) => response.data as any,
   (error: AxiosError) => Promise.reject(error)
 )
 

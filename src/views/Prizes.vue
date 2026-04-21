@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
-import type { Prize, PrizeLevel, CreatePrizeDto, UpdatePrizeDto } from '@/types'
+import type { Prize, PrizeLevel } from '@/types'
 
 interface PrizeFormData {
   name: string
@@ -96,7 +96,7 @@ const openAddModal = () => {
 
 const editPrize = (prize: Prize) => {
   editingPrize.value = prize
-  prizeForm.value = { ...prize, level: prize.level as PrizeLevel }
+  prizeForm.value = { name: prize.name, level: prize.level as PrizeLevel, quantity: prize.quantity, image_url: prize.image_url || '' }
   showAddModal.value = true
 }
 

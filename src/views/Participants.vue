@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useLotteryStore } from '@/stores/lottery'
-import type { Participant, ParticipantStatus, CreateParticipantDto } from '@/types'
+import type { Participant, CreateParticipantDto } from '@/types'
 
 interface StatusTextMap {
   [key: string]: string

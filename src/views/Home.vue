@@ -86,7 +86,7 @@ const availablePrizes = computed<Prize[]>(() => lotteryStore.availablePrizes)
 const currentPrize = computed<Prize | null>(() => lotteryStore.currentPrize)
 const recentWinners = computed<Winner[]>(() => lotteryStore.recentWinners)
 
-const getParticleStyle = (i: number): Record<string, string> => {
+const getParticleStyle = (_i: number): Record<string, string> => {
   return {
     left: `${Math.random() * 100}%`,
     top: `${Math.random() * 100}%`,
@@ -132,7 +132,7 @@ onMounted(async () => {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   padding: 40px 20px;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .bg-effects {
